@@ -66,6 +66,7 @@ async function returnKey (keyId, to) {
 async function transferKey (keyId, from, to) {
 	const key = await getKey(keyId);
 	if (!key) return Promise.reject(new Error('Invalid key ID'));
+	if (from === to) return Promise.reject(new Error('Keys cannot be transferred between the same person'));
 	if (key.with !== from && key.with !== to) return Promise.reject(new Error('Transferrer does not have the key'))
 	const fromUser = await getUser(key.with), toUser = await getUser(from === key.with ? to : from);
 	if (!fromUser || !toUser) return Promise.reject(new Error('Invalid user ID(s)'));
