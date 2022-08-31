@@ -10,7 +10,7 @@ POST `/otp` `{ otp: String, mobile: String }` -> `String` (token)<br/>
 <br/>
 (Note that all API endpoints after this line require the `x-auth-token` header)<br/>
 <br/>
-GET `/api/key/:keyId` -> `Key`<br/>
+GET `/api/key/:keyId` -> `{ key: Key, with?: User }`<br/>
 GET `/api/user/:userId` -> `User`<br/>
 GET `/api/exchange/:keyId/:nonce`<br/>
 	-> `[String (warnings)]` if req.user 'borrows' key<br/>
