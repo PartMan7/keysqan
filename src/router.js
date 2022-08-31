@@ -26,7 +26,6 @@ router.post('/otp', async (req, res) => {
 	const { mobile, otp } = req.body;
 	if (typeof mobile !== 'string' || typeof otp !== 'string') return res.error(new Error('Missing mobile/OTP field'));
 	const user = await findUserByMobile(mobile);
-	console.log(user);
 	if (!user) return res.error(new Error('Mobile number not found'));
 	if (!checkOTP(otp, user._id.toString())) return res.error(new Error('Invalid OTP'));
 	// Validated successfully
@@ -58,7 +57,6 @@ router.all('/api/exchange/:keyId/:nonce', async (req, res) => {
 	const keyInfo = await checkKey(req.params.keyId);
 	if (!keyInfo?.key) return res.error(new Error('Invalid key'));
 	const key = keyInfo.key;
-	// console.log(key, req.user);
 	if (!key.with) {
 		try {
 			const warnings = await borrowKey(req.params.keyId, req.user._id.toString());

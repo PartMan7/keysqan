@@ -21,5 +21,3 @@ exports.checkOTP = function (otp, id) {
 	if (otp === lastOTP) return true;
 	return false;
 };
-
-console.log(exports.generateOTP('6309ca8bbf2d8e014e058245'));
