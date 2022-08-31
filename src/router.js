@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { getUser, findUserByMobile } = require('../database/models/user.js');
-const { checkKey, borrowKey, returnKey, transferKey } = require('../database/models/key.js');
+const { checkKey, borrowKey, returnKey, transferKey, allKeys } = require('../database/models/key.js');
 
 const { generateToken, verifyToken } = require('./jwt.js');
 const checkNonce = require('./nonce.js');
@@ -42,6 +42,10 @@ router.post('/update', (req, res) => {
 router.all('/api/key/:keyId', (req, res) => {
 	// Fetches :keyId information
 	checkKey(req.params.keyId).then(res.success).catch(res.error);
+});
+router.all('/api/keys', (req, res) => {
+	// Fetches all keys
+	allKeys().then(res.success).catch(res.error);
 });
 
 router.all('/api/user/:userId', (req, res) => {

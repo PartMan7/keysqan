@@ -82,10 +82,15 @@ async function transferKey (keyId, from, to) {
 	await log({ action: 'transfer', from: fromId, to: toId });
 }
 
+async function allKeys () {
+	return Key.find();
+}
+
 module.exports = {
 	getKey,
 	checkKey,
 	borrowKey,
 	returnKey,
-	transferKey
+	transferKey,
+	allKeys
 };
