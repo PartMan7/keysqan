@@ -29,8 +29,9 @@ router.post('/otp', async (req, res) => {
 	if (!user) return res.error(new Error('Mobile number not found'));
 	if (!checkOTP(otp, user._id.toString())) return res.error(new Error('Invalid OTP'));
 	// Validated successfully
-	const token = generateToken(user.toJSON());
-	return res.success(token);
+	const json = user.toJSON();
+	const token = generateToken(json);
+	return res.success({ token, user });
 });
 
 router.post('/update', (req, res) => {

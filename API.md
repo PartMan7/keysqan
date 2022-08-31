@@ -6,7 +6,7 @@
 All API responses are either `{ success: true, data: Any }` or `{ success: false, data: Any, error: Error }`. Note that **requests will fail** if `version` is either absent as a header or if it is outdated. The responses given below are contained in `res.data`.<br/>
 <br/>
 POST `/login` `{ mobile: String }` -> `null`<br/>
-POST `/otp` `{ otp: String, mobile: String }` -> `String` (token)<br/>
+POST `/otp` `{ otp: String, mobile: String }` -> `{ token: String, user: User }` (token)<br/>
 <br/>
 (Note that all API endpoints after this line require the `x-auth-token` header)<br/>
 <br/>
