@@ -2,9 +2,9 @@ const axios = require('axios');
 
 const cooldowns = {};
 
-module.exports = function SMS (mobile, otp) {
+module.exports = function SMS (mobile, otp, ip) {
 	// Ratelimit this!
-	if (cooldowns[mobile]) return Promise.reject(new Error('Ratelimited'));
+	if (ip && cooldowns[ip]) return Promise.reject(new Error('Ratelimited'));
 	mobile = mobile.replace(/\D/g, '');
 	return axios.get(`https://api.authkey.io/request`, {
 		params: {
@@ -16,10 +16,12 @@ module.exports = function SMS (mobile, otp) {
 			company: 'Keysqan'
 		}
 	}).then(res => {
-		cooldowns[mobile] = true;
-		setTimeout(() => {
-			delete cooldowns[mobile];
-		}, 60_000);
+		if (ip) {
+			cooldowns[ip] = true;
+			setTimeout(() => {
+				delete cooldowns[ip];
+			}, 60_000);
+		}
 		return Promise.resolve(res);
 	});
 }

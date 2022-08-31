@@ -17,7 +17,7 @@ router.post('/login', async (req, res) => {
 	const user = await findUserByMobile(mobile);
 	if (!user) return res.error(new Error('Mobile number not found'));
 	const otp = generateOTP(user._id.toString());
-	SMS(mobile, otp).then(() => res.success('Your OTP has been sent via SMS and will be valid for 5 minutes.')).catch(res.error);
+	SMS(mobile, otp, req.ip || req.headers['x-forwarded-for']).then(() => res.success('Your OTP has been sent via SMS and will be valid for 5 minutes.')).catch(res.error);
 });
 
 router.post('/otp', async (req, res) => {
