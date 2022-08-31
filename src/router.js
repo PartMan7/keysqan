@@ -1,22 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const { checkUser } = require('../database/models/user.js');
+
+const { getUser, findUserByMobile } = require('../database/models/user.js');
 const { checkKey, borrowKey, returnKey, transferKey } = require('../database/models/key.js');
 
-router.post('/login', (req, res) => {
+const { generateToken, verifyToken } = require('./jwt.js');
+const checkNonce = require('./nonce.js');
+const { checkOTP, generateOTP } = require('./otp.js');
+const SMS = require('./sms.js');
+
+router.post('/login', async (req, res) => {
 	// Login attempt; redirect to home if success, else send TOTP
 	// { mobile: String }
-	// { email: String }
+	const { mobile } = req.body;
+	if (typeof mobile !== 'string') return res.error(new Error('Missing mobile field'));
+	const user = await findUserByMobile(mobile);
+	if (!user) return res.error(new Error('Mobile number not found'));
+	const otp = generateOTP(user._id.toString());
+	SMS(mobile, otp).then(() => res.success('Your OTP has been sent via SMS and will be valid for 5 minutes.')).catch(res.error);
 });
 
-router.post('/otp', (req, res) => {
+router.post('/otp', async (req, res) => {
 	// Validates OTP:
 	// { mobile: String, otp: String }
-	// { email: String, otp: String }
-});
-
-router.all('/logout', (req, res) => {
-	// Logs out
+	const { mobile, otp } = req.body;
+	if (typeof mobile !== 'string' || typeof otp !== 'string') return res.error(new Error('Missing mobile/OTP field'));
+	const user = await findUserByMobile(mobile);
+	console.log(user);
+	if (!user) return res.error(new Error('Mobile number not found'));
+	if (!checkOTP(otp, user._id.toString())) return res.error(new Error('Invalid OTP'));
+	// Validated successfully
+	const token = generateToken(user.toJSON());
+	return res.success(token);
 });
 
 router.post('/update', (req, res) => {
@@ -31,29 +46,41 @@ router.all('/api/key/:keyId', (req, res) => {
 
 router.all('/api/user/:userId', (req, res) => {
 	// Fetches :userId's profile info
-	checkUser(req.params.userId).then(res.success).catch(res.error);
+	getUser(req.params.userId).then(res.success).catch(res.error);
 });
 
-router.all('/api/exchange/:keyId', async (req, res) => {
+router.all('/api/exchange/:keyId/:nonce', async (req, res) => {
 	// Can do three things:
 	// a) If key is available, req.user borrows :keyId
 	// b) If key is unavailable and req.user._id === :keyId.with, req.user returns :keyId
 	// c) If key is unavailable and req.user._id !== :keyId.with, error is shown with the current holder's info
-	const key = await checkKey(req.params.keyId);
-	if (!key) return res.error(new Error('Invalid key'));
+	if (!checkNonce(req.params.nonce)) return res.error(new Error('Invalid/missing nonce'));
+	const keyInfo = await checkKey(req.params.keyId);
+	if (!keyInfo?.key) return res.error(new Error('Invalid key'));
+	const key = keyInfo.key;
+	// console.log(key, req.user);
 	if (!key.with) {
-		const warnings = await borrowKey(req.params.keyId, req.user._id);
-		return res.success(warnings);
-	} else if (key.with === req.user._id) {
-		await returnKey(req.params.keyId, req.user._id);
-		return res.success(true);
-	} else checkUser(key.with).then(user => res.error(new Error(`Key is with ${user.name}`), user));
+		try {
+			const warnings = await borrowKey(req.params.keyId, req.user._id.toString());
+			return res.success(warnings);
+		} catch (err) {
+			if (Array.isArray(err)) res.error(...err);
+			else res.error(err);
+		}
+	} else if (key.with === req.user._id.toString()) {
+		await returnKey(req.params.keyId, req.user._id.toString());
+		return res.success(null);
+	} else res.error(new Error(`Key is with ${keyInfo.with.name}`), keyInfo.with);
 });
 
 router.all('/api/transfer/:keyId/:userId', (req, res) => {
 	// Transfer :keyId between :userId and req.user
-	if (!req.params.keyId || !req.params.userId) return res.status(422).send('Missing keyId/userId');
-	transferKey(req.params.keyId, req.params.userId, req.user._id).then(res.success).catch(res.error);
+	if (!req.params.keyId || !req.params.userId) return res.error(new Error('Missing keyId/userId'));
+	transferKey(req.params.keyId, req.params.userId, req.user._id.toString()).then(res.success).catch(res.error);
+});
+
+router.all((req, res) => {
+	res.status(404).send('Page not found');
 });
 
 module.exports = router;

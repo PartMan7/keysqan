@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const DB = require('../connection.js');
 
 const LogSchema = new mongoose.Schema({
 	action: {
@@ -22,13 +21,13 @@ const LogSchema = new mongoose.Schema({
 	}
 });
 
-const Log = DB.model('Log', LogSchema, 'logs');
+const Log = mongoose.model('Log', LogSchema, 'logs');
 
 async function countLogs () {
 	return Log.countDocuments();
 }
 
-async function getLogs (page, perPage) {
+async function getLogs (page, perPage = 25) {
 	return Log.find({}, {
 		action: true,
 		from: true,

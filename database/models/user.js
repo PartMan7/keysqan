@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const DB = require('../connection.js');
 
 const UserSchema = new mongoose.Schema({
 	name: {
@@ -19,7 +18,7 @@ const UserSchema = new mongoose.Schema({
 	mobile: {
 		type: String,
 		required: true,
-		trim: true
+		trim: true,
 		minLength: 10
 	},
 	room: {
@@ -38,27 +37,30 @@ const UserSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 		trim: true,
-		default: 'https://i.ibb.co/86dtnKG/rkh.jpg'
+		default: 'https://i.ibb.co/nf6C3JH/xdtgfhcjgvbhkjnl.jpg'
 	},
 	keys: {
 		type: Map,
 		of: String,
-		required: true
+		required: true,
+		default: new Map()
 	},
 	admin: Boolean
 });
 
-const User = DB.model('User', UserSchema, 'users');
+const User = mongoose.model('User', UserSchema, 'users');
 
 async function getUser (userId) {
 	return User.findById(userId);
 }
 
-async function checkUser (userId) {
-	return getUser(userId).lean();
+async function findUserByMobile (mobile) {
+	mobile = mobile.replace(/\D/g, '');
+	const user = await User.findOne({ mobile });
+	return user;
 }
 
 module.exports = {
 	getUser,
-	checkUser
+	findUserByMobile
 };

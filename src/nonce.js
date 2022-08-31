@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const seed = SECRETS.NONCE_SEED;
 
 module.exports = function checkNonce (nonce) {
+	if (!nonce) return null;
 	const time = Date.now();
 	// Clamp time to the closest 30s
 	const timeSeed = Math.floor(Date.now() / 30_000);

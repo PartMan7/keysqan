@@ -1,6 +1,6 @@
-# Keytag
+# Keysqan
 
-[Keytag client](https://github.com/The-Halfbloodprince/keytag-client)
+[Keysqan client](https://github.com/The-Halfbloodprince/keytag-client)
 <br/><br/>
 
 A software for key management based on QR codes.
