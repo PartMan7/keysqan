@@ -31,7 +31,7 @@ exports.init = function initialize (app) {
 			const parsed = verifyToken(token);
 			req.user = parsed;
 		} catch (err) {
-			console.log(err);
+			// console.log(err);
 		} finally {
 			next();
 		}
