@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = Buffer.from(SECRETS.JWT_SECRET, 'base64');
-const ACCESS_VALID_TIME = '300d';
+const ACCESS_VALID_TIME = '28d';
 
 const generateToken = payload => {
 	return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_VALID_TIME });

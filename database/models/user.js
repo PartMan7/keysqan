@@ -17,13 +17,11 @@ const UserSchema = new mongoose.Schema({
 	},
 	mobile: {
 		type: String,
-		required: true,
 		trim: true,
 		minLength: 10
 	},
 	room: {
 		type: String,
-		required: true,
 		trim: true,
 		uppercase: true
 	},

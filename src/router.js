@@ -29,13 +29,17 @@ router.post('/otp', async (req, res) => {
 	if (!user) return res.error(new Error('Mobile number not found'));
 	if (!checkOTP(otp, user._id.toString())) return res.error(new Error('Invalid OTP'));
 	// Validated successfully
-	const json = user.toJSON();
-	const token = generateToken(json);
+	const token = generateToken({ userId: user._id.toString() });
 	return res.success({ token, user });
 });
 
 router.post('/update', (req, res) => {
 	// Updates user profile picture
+});
+
+router.all('/api/valid', (req, res) => {
+	const token = generateToken(req.user._id.toString());
+	return res.success({ token, user: req.user });
 });
 
 

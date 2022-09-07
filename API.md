@@ -12,6 +12,7 @@ POST `/otp` `{ otp: String, mobile: String }` -> `{ token: String, user: User }`
 <br/>
 (Note that all API endpoints after this line require the `x-auth-token` header)<br/>
 <br/>
+GET `/api/valid` -> `{ token: String, user: User }`<br/>
 GET `/api/key/:keyId` -> `{ key: Key, with?: User }`<br/>
 GET `/api/keys` -> `[Key]`<br/>
 GET `/api/user/:userId` -> `User`<br/>

@@ -2,6 +2,7 @@ const config = require('./config.js');
 const express = require('express');
 const semver = require('semver');
 const { generateToken, verifyToken } = require('./jwt.js');
+const { checkUser } = require('../database/models/user.js');
 
 exports.init = function initialize (app) {
 
@@ -14,7 +15,7 @@ exports.init = function initialize (app) {
 
 	app.use((req, res, next) => {
 		const clientVersion = req.headers?.['version'] || req.body?.['version'] || req.cookies?.['version'];
-		if (semver.satisfies(clientVersion, config.version)) next();
+		if (clientVersion && semver.satisfies(clientVersion, config.version)) next();
 		else return res.status(400).send({ success: false, data: `Client version is outdated; please use ${config.version}` });
 	});
 
@@ -28,8 +29,10 @@ exports.init = function initialize (app) {
 		const token = req.headers?.['x-auth-token'] || req.body?.['x-auth-token'] || req.cookies?.['x-auth-token'];
 		if (!token) return next();
 		try {
-			const parsed = verifyToken(token);
-			req.user = parsed;
+			const { userId } = verifyToken(token);
+			const user = await checkUser(userId);
+			if (!user) return res.status(401).send('Invalid JWT token');
+			req.user = user;
 		} catch (err) {
 			// console.log(err);
 		} finally {
@@ -38,7 +41,7 @@ exports.init = function initialize (app) {
 	});
 
 	app.use('/api', (req, res, next) => {
-		if (!req.user) return res.status(401).send('Please log in');
+		if (!req.user) return res.status(401).send('Please log in.');
 		next();
 	});
 
