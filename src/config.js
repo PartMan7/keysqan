@@ -1,4 +1,5 @@
 module.exports = {
 	port: 8081,
-	version: '0.X'
+	version: '0.X',
+	securityNonce: false
 };

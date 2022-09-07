@@ -1,3 +1,4 @@
+const config = require('./config.js');
 const express = require('express');
 const router = express.Router();
 
@@ -62,7 +63,9 @@ router.all('/api/exchange/:keyId/:nonce', async (req, res) => {
 	// a) If key is available, req.user borrows :keyId
 	// b) If key is unavailable and req.user._id === :keyId.with, req.user returns :keyId
 	// c) If key is unavailable and req.user._id !== :keyId.with, error is shown with the current holder's info
-	if (!checkNonce(req.params.nonce)) return res.error(new Error('Invalid/missing nonce'));
+	if (config.securityNonce) {
+		if (!checkNonce(req.params.nonce)) return res.error(new Error('Invalid/missing nonce'));
+	}
 	const keyInfo = await checkKey(req.params.keyId);
 	if (!keyInfo?.key) return res.error(new Error('Invalid key'));
 	const key = keyInfo.key;
